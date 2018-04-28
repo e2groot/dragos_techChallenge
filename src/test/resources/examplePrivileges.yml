@@ -1,0 +1,6 @@
+example-readonly:
+  - 'CanReadCustomer'
+example-readwrite:
+  - 'CanReadCustomer'
+  - 'CanWriteCustomer'
+example-none: []
