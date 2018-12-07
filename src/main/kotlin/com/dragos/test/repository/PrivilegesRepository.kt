@@ -4,6 +4,7 @@ import com.dragos.test.UnauthenticatedException
 import com.dragos.test.model.AuthToken
 import com.dragos.test.model.Privilege
 import io.reactivex.Flowable
+import io.reactivex.Single
 
 interface PrivilegesRepository {
 

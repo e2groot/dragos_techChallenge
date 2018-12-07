@@ -1,6 +1,7 @@
 package com.dragos.test.api.v1
 
 import com.dragos.test.UnauthenticatedException
+import com.dragos.test.model.AuthToken
 import com.dragos.test.model.CustomerCreate
 import com.dragos.test.model.CustomerFindCriteria
 import com.dragos.test.model.CustomerUpdate
@@ -28,9 +29,16 @@ class ApiV1(registry: Registry) : Action<Chain> {
             .setSerializationInclusion(JsonInclude.Include.NON_NULL)
         private val objectWriter = objectMapper.writer()
 
-        private fun Context.getAuthToken() = request.headers["AuthToken"] ?: throw UnauthenticatedException("must provide an AuthToken header")
-    }
+        private fun Context.getAuthToken() = validateAuthToken(request.headers["AuthToken"])
+        // ?: throw UnauthenticatedException("must provide an AuthToken header")
 
+        private fun validateAuthToken(authToken: AuthToken): String {
+            if (authToken.isNotEmpty())
+                return authToken
+            else
+                throw UnauthenticatedException("must provide an AuthToken header")
+        }
+    }
 
     private val customerService = registry[CustomerService::class.java]
 
@@ -54,7 +62,10 @@ class ApiV1(registry: Registry) : Action<Chain> {
 
     private fun createCustomer(context: Context) {
         context.parse(fromJson(CustomerCreate::class.java, objectMapper))
-            .flatMap { create -> promiseSingle(customerService.create(create, context.getAuthToken())) }
+            .flatMap {
+                create ->
+                promiseSingle(customerService.create(create, context.getAuthToken()))
+            }
             .then { created -> context.render(json(created, objectWriter)) }
     }
 

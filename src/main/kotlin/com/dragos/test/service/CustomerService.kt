@@ -1,6 +1,7 @@
 package com.dragos.test.service
 
 import com.dragos.test.NotFoundException
+import com.dragos.test.UnauthenticatedException
 import com.dragos.test.UnauthorizedException
 import com.dragos.test.model.*
 import com.dragos.test.repository.CustomerRepository
@@ -8,7 +9,10 @@ import com.dragos.test.repository.PrivilegesRepository
 import com.dragos.test.toSingleOrThrow
 import io.reactivex.Completable
 import io.reactivex.Flowable
+import io.reactivex.Maybe
 import io.reactivex.Single
+import io.reactivex.internal.schedulers.ComputationScheduler
+import io.reactivex.schedulers.Schedulers
 import java.time.Clock
 import java.time.OffsetDateTime
 
@@ -25,9 +29,26 @@ class CustomerService(
      * @param authToken used to resolve the requester's privileges
      * @return the created customer [Single]
      */
+    @Throws(UnauthenticatedException::class)
     fun create(model: CustomerCreate, authToken: AuthToken): Single<Customer> =
-        checkPrivilege(authToken, CAN_WRITE_CUSTOMER)
-            .andThen(customerRepository.insert(model, OffsetDateTime.now(clock)))
+            checkPrivilege(authToken, CAN_WRITE_CUSTOMER)
+                    .andThen(
+                            Single.defer {
+                                customerRepository.insert(model, OffsetDateTime.now(clock))
+                            }
+                    )
+        /*Single.fromCallable( {checkPrivilege(authToken, CAN_WRITE_CUSTOMER)
+            .andThen(customerRepository.insert(model, OffsetDateTime.now(clock)))} )
+                .subscribeOn(Schedulers.computation())
+                .subscribe( {
+                    s -> s.subscribe( {
+                        s -> if ( !s.toString().isEmpty() ) {
+                            customerRepository.insert(model, OffsetDateTime.now(clock))
+                        }
+                        })
+                })*/
+
+
 
     /**
      * Gets one [Customer] by ID. [AuthToken] must resolve to having [CAN_READ_CUSTOMER] privilege.
@@ -84,8 +105,8 @@ class CustomerService(
             .toSingleOrThrow { NotFoundException("could not find customer with id $id") }
 
     fun checkPrivilege(authToken: AuthToken, requiredPrivilege: Privilege): Completable =
-        privilegesRepository.getPrivileges(authToken)
-            .filter { it == requiredPrivilege }
-            .switchIfEmpty { subscriber -> subscriber.onError(UnauthorizedException("must have '$requiredPrivilege' privilege")) }
-            .ignoreElements()
+            privilegesRepository.getPrivileges(authToken)
+                .filter { it == requiredPrivilege }
+                .switchIfEmpty { subscriber -> subscriber.onError(UnauthorizedException("must have '$requiredPrivilege' privilege")) }
+                .ignoreElements()
 }

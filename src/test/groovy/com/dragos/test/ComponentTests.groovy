@@ -13,6 +13,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class ComponentTests extends Specification {
     private static objectMapper = new ObjectMapper()
@@ -26,7 +27,8 @@ class ComponentTests extends Specification {
         'app.examplePrivilegesYamlPath=examplePrivileges.yml'
     )
 
-    def httpClient = new OkHttpClient.Builder().build()
+    def httpClient = new OkHttpClient.Builder().connectTimeout(1l, TimeUnit.HOURS).readTimeout(1l, TimeUnit.HOURS)
+            .build()
 
     @Unroll
     def 'try to create with #description'() {

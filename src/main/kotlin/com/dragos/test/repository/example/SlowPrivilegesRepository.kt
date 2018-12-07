@@ -21,6 +21,8 @@ class SlowPrivilegesRepository(exampleDataSourceYmlClasspath: String) : Privileg
         object : TypeReference<Map<AuthToken, Set<Privilege>>>() {}
     )
 
+    private val tokenCache: HashMap<String, Flowable<Privilege>> = HashMap()
+
     /**
      * Waits a second then returns a [Flowable] of [Privilege]s that are associated with the provided [AuthToken].
      *
@@ -28,9 +30,13 @@ class SlowPrivilegesRepository(exampleDataSourceYmlClasspath: String) : Privileg
      */
     @Throws(UnauthenticatedException::class)
     override fun getPrivileges(authToken: AuthToken): Flowable<Privilege> {
+        if (tokenCache.containsKey(authToken))
+            return tokenCache.get(authToken)!!
+
         // just here to simulate a slow external service
         Thread.sleep(1000)
-
-        return data[authToken]?.let { Flowable.fromIterable(it) } ?: Flowable.error(UnauthenticatedException("invalid auth token"))
+        val item = data[authToken]?.let { Flowable.fromIterable(it)} ?: Flowable.error(UnauthenticatedException("invalid auth token"))
+        tokenCache.put(authToken, item)
+        return item
     }
 }

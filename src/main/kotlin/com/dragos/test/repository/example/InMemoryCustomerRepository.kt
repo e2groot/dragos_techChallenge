@@ -6,9 +6,10 @@ import io.reactivex.Flowable
 import io.reactivex.Maybe
 import io.reactivex.Single
 import java.time.OffsetDateTime
+import java.util.concurrent.atomic.AtomicLong
 
 class InMemoryCustomerRepository : CustomerRepository {
-    private var nextId: CustomerId = 1
+    private var nextId = AtomicLong(1)
     private val data = mutableMapOf<CustomerId, Customer>()
 
     /**
@@ -16,7 +17,7 @@ class InMemoryCustomerRepository : CustomerRepository {
      */
     override fun insert(create: CustomerCreate, now: OffsetDateTime): Single<Customer> {
         val customer = Customer(
-            id = nextId++,
+            id = nextId.getAndIncrement(),
             name = create.name,
             createdAt = now,
             lastLoggedInAt = now
@@ -43,7 +44,10 @@ class InMemoryCustomerRepository : CustomerRepository {
                 criteria.lastLoggedInBefore?.let { lastLoggedInBefore -> customer.lastLoggedInAt < lastLoggedInBefore } != false &&
                 criteria.lastLoggedInAfter?.let { lastLoggedInAfter -> customer.lastLoggedInAt < lastLoggedInAfter } != false
             }
-            .let { founds -> Flowable.fromIterable(founds) }
+            .let {
+                founds ->
+                Flowable.fromIterable(founds)
+            }
 
     /**
      * @see [CustomerRepository.update]
