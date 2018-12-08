@@ -5,7 +5,7 @@ import com.dragos.test.model.AuthToken
 import com.dragos.test.model.CustomerCreate
 import com.dragos.test.model.CustomerFindCriteria
 import com.dragos.test.model.CustomerUpdate
-import com.dragos.test.service.CustomerService
+import com.dragos.test.service.PersistableCustomerService
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -30,7 +30,6 @@ class ApiV1(registry: Registry) : Action<Chain> {
         private val objectWriter = objectMapper.writer()
 
         private fun Context.getAuthToken() = validateAuthToken(request.headers["AuthToken"])
-        // ?: throw UnauthenticatedException("must provide an AuthToken header")
 
         private fun validateAuthToken(authToken: AuthToken): String {
             if (authToken.isNotEmpty())
@@ -40,7 +39,7 @@ class ApiV1(registry: Registry) : Action<Chain> {
         }
     }
 
-    private val customerService = registry[CustomerService::class.java]
+    private val customerService = registry[PersistableCustomerService::class.java]
 
     override fun execute(chain: Chain) {
         chain.prefix("customer") { customerChain -> customerChain
@@ -49,6 +48,11 @@ class ApiV1(registry: Registry) : Action<Chain> {
                     .post(::createCustomer)
                     .get(::getManyCustomers)
                 }
+            }
+            .path("opp/persist") { context -> context
+                    .byMethod { spec -> spec
+                            .post(::persistToDatabase)
+                    }
             }
             .path(":id") { context -> context
                 .byMethod { spec -> spec
@@ -98,5 +102,10 @@ class ApiV1(registry: Registry) : Action<Chain> {
     private fun deleteCustomer(context: Context) {
         promiseSingle(customerService.delete(context.allPathTokens["id"]!!.toLong(), context.getAuthToken()))
             .then { deleted -> context.render(json(deleted, objectWriter)) }
+    }
+
+    private fun persistToDatabase(context: Context) {
+        promiseSingle(customerService.persistToDatabase(context.getAuthToken()))
+                .then{integer -> context.render(json(integer, objectWriter))}
     }
 }

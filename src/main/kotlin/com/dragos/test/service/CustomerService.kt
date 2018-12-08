@@ -9,14 +9,11 @@ import com.dragos.test.repository.PrivilegesRepository
 import com.dragos.test.toSingleOrThrow
 import io.reactivex.Completable
 import io.reactivex.Flowable
-import io.reactivex.Maybe
 import io.reactivex.Single
-import io.reactivex.internal.schedulers.ComputationScheduler
-import io.reactivex.schedulers.Schedulers
 import java.time.Clock
 import java.time.OffsetDateTime
 
-class CustomerService(
+open class CustomerService(
     private val customerRepository: CustomerRepository,
     private val privilegesRepository: PrivilegesRepository,
     private val clock: Clock
@@ -37,17 +34,6 @@ class CustomerService(
                                 customerRepository.insert(model, OffsetDateTime.now(clock))
                             }
                     )
-        /*Single.fromCallable( {checkPrivilege(authToken, CAN_WRITE_CUSTOMER)
-            .andThen(customerRepository.insert(model, OffsetDateTime.now(clock)))} )
-                .subscribeOn(Schedulers.computation())
-                .subscribe( {
-                    s -> s.subscribe( {
-                        s -> if ( !s.toString().isEmpty() ) {
-                            customerRepository.insert(model, OffsetDateTime.now(clock))
-                        }
-                        })
-                })*/
-
 
 
     /**
@@ -73,7 +59,7 @@ class CustomerService(
      * @throws NotFoundException if no customer found with ID
      */
     fun getMany(criteria: CustomerFindCriteria, authToken: AuthToken): Flowable<Customer> =
-        checkPrivilege(authToken, CAN_READ_CUSTOMER)
+            checkPrivilege(authToken, CAN_READ_CUSTOMER)
             .andThen(customerRepository.find(criteria))
 
     /**

@@ -8,7 +8,7 @@ import io.reactivex.Single
 import java.time.OffsetDateTime
 import java.util.concurrent.atomic.AtomicLong
 
-class InMemoryCustomerRepository : CustomerRepository {
+open class InMemoryCustomerRepository : CustomerRepository {
     private var nextId = AtomicLong(1)
     private val data = mutableMapOf<CustomerId, Customer>()
 

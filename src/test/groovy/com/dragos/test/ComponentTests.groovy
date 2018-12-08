@@ -8,6 +8,7 @@ import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
+import okhttp3.Response
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -128,5 +129,22 @@ class ComponentTests extends Specification {
 
         cleanup:
         pool.shutdownNow()
+    }
+
+    def 'persist'() {
+        expect:
+        Response r = httpClient.newCall(
+                new Request.Builder()
+                        .url("http://localhost:12345/api/v1/customer/opp/persist")
+                        .post(RequestBody.create(
+                        applicationJsonMediaType,
+                        objectMapper.writeValueAsString([
+                                name: 'abc'
+                        ])
+                ))
+                        .addHeader('AuthToken', 'example-readwrite')
+                        .build()
+        ).execute()
+        r.body().string() == "1"
     }
 }

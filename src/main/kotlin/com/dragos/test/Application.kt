@@ -1,11 +1,11 @@
 package com.dragos.test
 
 import com.dragos.test.api.v1.ApiV1
-import com.dragos.test.repository.CustomerRepository
+import com.dragos.test.repository.IPersistableCustomerRepository
 import com.dragos.test.repository.PrivilegesRepository
-import com.dragos.test.repository.example.InMemoryCustomerRepository
+import com.dragos.test.repository.example.PersistableCustomerRepository
 import com.dragos.test.repository.example.SlowPrivilegesRepository
-import com.dragos.test.service.CustomerService
+import com.dragos.test.service.PersistableCustomerService
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import com.google.inject.Singleton
@@ -42,16 +42,15 @@ class MainModule(
 
     @Provides
     @Singleton
-    fun customerService(customerRepository: CustomerRepository, privilegesRepository: PrivilegesRepository, clock: Clock): CustomerService =
-        CustomerService(customerRepository, privilegesRepository, clock)
-
+    fun customerService(customerRepository: IPersistableCustomerRepository, privilegesRepository: PrivilegesRepository, clock: Clock): PersistableCustomerService =
+            PersistableCustomerService(customerRepository, privilegesRepository, clock)
 
     // Repositories
 
     @Provides
     @Singleton
-    fun customerRepository(): CustomerRepository =
-        InMemoryCustomerRepository()
+    fun customerRepository(): IPersistableCustomerRepository =
+        PersistableCustomerRepository()
 
     @Provides
     @Singleton
@@ -116,7 +115,7 @@ class Application(private val args: Array<String>) : AutoCloseable {
             ))
         })
         .handlers { chain -> chain
-            .prefix("api/v1", ApiV1(chain.registry))
+            .prefix("api/v1", ApiV1(chain.registry)) //contemplating v2 for new endpoint
         }
     }
 
