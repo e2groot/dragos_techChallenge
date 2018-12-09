@@ -53,7 +53,7 @@ class ApiV1(registry: Registry) : Action<Chain> {
             }
             .path("persist") { context -> context
                     .byMethod { spec -> spec
-                            .post(::persistToDatabase)
+                            .post(::persistToDatabaseFlatFile)
                     }
             }
             .path(":id") { context -> context
@@ -106,7 +106,7 @@ class ApiV1(registry: Registry) : Action<Chain> {
             .then { deleted -> context.render(json(deleted, objectWriter)) }
     }
 
-    private fun persistToDatabase(context: Context) {
+    private fun persistToDatabaseFlatFile(context: Context) {
         context.parse(fromJson(CustomerCreate::class.java, objectMapper))
                 .flatMap { create ->
                     promiseSingle(customerService.persistToFile(create, context.getAuthToken()))
