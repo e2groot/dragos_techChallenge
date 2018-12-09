@@ -6,6 +6,10 @@ import com.dragos.test.repository.PrivilegesRepository
 import com.dragos.test.repository.example.PersistableCustomerRepository
 import com.dragos.test.repository.example.SlowPrivilegesRepository
 import com.dragos.test.service.PersistableCustomerService
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import com.google.inject.Singleton
@@ -20,6 +24,7 @@ import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
 import kotlin.concurrent.thread
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 
 fun main(args: Array<String>) {
     RxRatpack.initialize()
@@ -51,7 +56,7 @@ class MainModule(
     @Provides
     @Singleton
     fun customerRepository(): IPersistableCustomerRepository =
-        PersistableCustomerRepository(file())
+        PersistableCustomerRepository(file(), mapper())
 
     @Provides
     @Singleton
@@ -73,6 +78,12 @@ class MainModule(
     @Provides
     @Singleton
     fun file(): File = File("database-file.txt") //singleton for file
+
+    @Provides
+    @Singleton
+    fun mapper(): ObjectMapper = jacksonObjectMapper().registerModules(JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
     // Error handlers
 

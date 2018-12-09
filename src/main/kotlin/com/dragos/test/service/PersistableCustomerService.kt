@@ -6,19 +6,20 @@ import com.dragos.test.model.CustomerCreate
 import com.dragos.test.repository.IPersistableCustomerRepository
 import com.dragos.test.repository.PrivilegesRepository
 import io.reactivex.Single
-import java.io.File
-import java.lang.StringBuilder
+
 import java.time.Clock
+import java.time.OffsetDateTime
 
 class PersistableCustomerService (private val persistableCustomerRepository: IPersistableCustomerRepository,
                                   privilegesRepository: PrivilegesRepository,
                                   clock: Clock)
     : CustomerService (persistableCustomerRepository, privilegesRepository, clock) {
-    fun persistToDatabase(model: CustomerCreate, authToken: AuthToken) : Single<Integer> {
+
+    fun persistToDatabase(model: CustomerCreate, authToken: AuthToken) : Single<Long> {
         return checkPrivilege(authToken, CAN_WRITE_CUSTOMER)
                 .andThen(
                         Single.defer {
-                            persistableCustomerRepository.persistData(model)
+                            persistableCustomerRepository.persistData(model, OffsetDateTime.now())
                         }
                 )
     }

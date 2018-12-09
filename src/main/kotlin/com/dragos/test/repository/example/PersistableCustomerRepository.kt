@@ -1,22 +1,29 @@
 package com.dragos.test.repository.example
 
+import com.dragos.test.model.Customer
 import com.dragos.test.model.CustomerCreate
 import com.dragos.test.repository.IPersistableCustomerRepository
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.reactivex.Single
 import java.io.File
 import java.lang.StringBuilder
+import java.time.OffsetDateTime
+import java.util.concurrent.atomic.AtomicLong
 
-class PersistableCustomerRepository(private val file: File): IPersistableCustomerRepository, InMemoryCustomerRepository() {
-    
-    override fun persistData(model: CustomerCreate): Single<Integer> {
+class PersistableCustomerRepository(private val file: File, private val objectMapper: ObjectMapper)
+    : IPersistableCustomerRepository, InMemoryCustomerRepository() {
+
+    private var nextId = AtomicLong(1)
+    override fun persistData(model: CustomerCreate, now: OffsetDateTime): Single<Long> {
         val strBuilder = StringBuilder()
-        strBuilder.append(jacksonObjectMapper().writeValueAsString(model)).append("\n")
-        //File("test-database.txt").writeText(strBuilder.toString())
-        file.writeText(strBuilder.toString())
-        System.out.println("You can reach me!!!")
-        return Single.just(Integer(1))
+        val customer = Customer(
+                id = nextId.getAndIncrement(),
+                name = model.name,
+                createdAt = now,
+                lastLoggedInAt = now
+        )
+        strBuilder.append(objectMapper.writeValueAsString(customer)).append("\n")
+        file.appendText(strBuilder.toString())
+        return Single.just(customer.id)
     }
-
-
 }

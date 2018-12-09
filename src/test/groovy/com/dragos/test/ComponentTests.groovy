@@ -14,7 +14,6 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 class ComponentTests extends Specification {
     private static objectMapper = new ObjectMapper()
@@ -28,8 +27,7 @@ class ComponentTests extends Specification {
         'app.examplePrivilegesYamlPath=examplePrivileges.yml'
     )
 
-    def httpClient = new OkHttpClient.Builder().connectTimeout(1l, TimeUnit.HOURS).readTimeout(1l, TimeUnit.HOURS)
-            .build()
+    def httpClient = new OkHttpClient.Builder().build()
 
     @Unroll
     def 'try to create with #description'() {
@@ -131,7 +129,7 @@ class ComponentTests extends Specification {
         pool.shutdownNow()
     }
 
-    def 'persist'() {
+    def 'persistOne'() {
         expect:
         Response r = httpClient.newCall(
                 new Request.Builder()
@@ -146,5 +144,37 @@ class ComponentTests extends Specification {
                         .build()
         ).execute()
         r.body().string() == "1"
+    }
+
+    def 'persistMany'() {
+        given:
+        def file = new File('database-file.txt')
+        file.delete()
+        def pool = Executors.newFixedThreadPool(8)
+
+        expect:
+
+        Flowable.range(1, 100)
+                .parallel(8)
+                .runOn(Schedulers.from(pool))
+                .map {
+            httpClient.newCall(
+                    new Request.Builder()
+                            .url("http://localhost:12345/api/v1/customer/opp/persist")
+                            .post(RequestBody.create(
+                            applicationJsonMediaType,
+                            objectMapper.writeValueAsString([
+                                    name: 'abc'
+                            ])
+                    ))
+                            .addHeader('AuthToken', 'example-readwrite')
+                            .build()
+            ).execute()
+        }
+        .map({ response -> objectMapper.readValue(response.body().string(), String) } as Function)
+        .sequential()
+        .blockingIterable()
+        .toSet()
+        .size() == 100
     }
 }

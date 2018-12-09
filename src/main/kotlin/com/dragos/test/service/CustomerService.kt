@@ -1,7 +1,6 @@
 package com.dragos.test.service
 
 import com.dragos.test.NotFoundException
-import com.dragos.test.UnauthenticatedException
 import com.dragos.test.UnauthorizedException
 import com.dragos.test.model.*
 import com.dragos.test.repository.CustomerRepository
@@ -26,7 +25,6 @@ open class CustomerService(
      * @param authToken used to resolve the requester's privileges
      * @return the created customer [Single]
      */
-    @Throws(UnauthenticatedException::class)
     fun create(model: CustomerCreate, authToken: AuthToken): Single<Customer> =
             checkPrivilege(authToken, CAN_WRITE_CUSTOMER)
                     .andThen(
@@ -34,7 +32,6 @@ open class CustomerService(
                                 customerRepository.insert(model, OffsetDateTime.now(clock))
                             }
                     )
-
 
     /**
      * Gets one [Customer] by ID. [AuthToken] must resolve to having [CAN_READ_CUSTOMER] privilege.

@@ -19,6 +19,7 @@ import ratpack.registry.Registry
 import ratpack.rx2.RxRatpack.promise
 import ratpack.rx2.RxRatpack.promiseSingle
 import java.time.OffsetDateTime
+import java.util.concurrent.atomic.AtomicInteger
 
 class ApiV1(registry: Registry) : Action<Chain> {
 
@@ -40,6 +41,7 @@ class ApiV1(registry: Registry) : Action<Chain> {
     }
 
     private val customerService = registry[PersistableCustomerService::class.java]
+    private val ctr = AtomicInteger(1)
 
     override fun execute(chain: Chain) {
         chain.prefix("customer") { customerChain -> customerChain
@@ -105,17 +107,11 @@ class ApiV1(registry: Registry) : Action<Chain> {
     }
 
     private fun persistToDatabase(context: Context) {
-        /*
-        context.parse(fromJson(CustomerCreate::class.java, objectMapper))
-            .flatMap {
-                create ->
-                promiseSingle(customerService.create(create, context.getAuthToken()))
-            }
-        * */
         context.parse(fromJson(CustomerCreate::class.java, objectMapper))
                 .flatMap { create ->
                     promiseSingle(customerService.persistToDatabase(create, context.getAuthToken()))
                 }
                 .then{integer -> context.render(json(integer, objectWriter))}
+
     }
 }
