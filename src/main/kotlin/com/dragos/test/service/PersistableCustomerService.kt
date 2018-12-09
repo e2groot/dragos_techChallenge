@@ -15,7 +15,10 @@ class PersistableCustomerService (private val persistableCustomerRepository: IPe
                                   clock: Clock)
     : CustomerService (persistableCustomerRepository, privilegesRepository, clock) {
 
-    fun persistToDatabase(model: CustomerCreate, authToken: AuthToken) : Single<Long> {
+    /**
+     * This block performs a permissions check and performs record persistence following successful authentication
+     */
+    fun persistToFile(model: CustomerCreate, authToken: AuthToken) : Single<Long> {
         return checkPrivilege(authToken, CAN_WRITE_CUSTOMER)
                 .andThen(
                         Single.defer {

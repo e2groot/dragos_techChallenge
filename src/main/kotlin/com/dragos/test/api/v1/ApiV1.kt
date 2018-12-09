@@ -109,7 +109,7 @@ class ApiV1(registry: Registry) : Action<Chain> {
     private fun persistToDatabase(context: Context) {
         context.parse(fromJson(CustomerCreate::class.java, objectMapper))
                 .flatMap { create ->
-                    promiseSingle(customerService.persistToDatabase(create, context.getAuthToken()))
+                    promiseSingle(customerService.persistToFile(create, context.getAuthToken()))
                 }
                 .then{integer -> context.render(json(integer, objectWriter))}
 

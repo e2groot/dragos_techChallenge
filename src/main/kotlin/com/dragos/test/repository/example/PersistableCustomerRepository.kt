@@ -14,6 +14,10 @@ class PersistableCustomerRepository(private val file: File, private val objectMa
     : IPersistableCustomerRepository, InMemoryCustomerRepository() {
 
     private var nextId = AtomicLong(1)
+
+    /**
+     * This function persists the serialized Customer object into a file
+     */
     override fun persistData(model: CustomerCreate, now: OffsetDateTime): Single<Long> {
         val strBuilder = StringBuilder()
         val customer = Customer(

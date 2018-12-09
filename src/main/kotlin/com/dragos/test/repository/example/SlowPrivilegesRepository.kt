@@ -30,6 +30,7 @@ class SlowPrivilegesRepository(exampleDataSourceYmlClasspath: String) : Privileg
      */
     @Throws(UnauthenticatedException::class)
     override fun getPrivileges(authToken: AuthToken): Flowable<Privilege> {
+        // checks the in-memory cache to see if the auth token exists
         if (tokenCache.containsKey(authToken))
             return tokenCache.get(authToken)!!
 
