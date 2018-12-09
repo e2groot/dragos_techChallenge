@@ -2,6 +2,7 @@ package com.dragos.test.repository.example
 
 import com.dragos.test.model.*
 import com.dragos.test.repository.CustomerRepository
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.reactivex.Flowable
 import io.reactivex.Maybe
 import io.reactivex.Single
@@ -23,6 +24,7 @@ open class InMemoryCustomerRepository : CustomerRepository {
             lastLoggedInAt = now
         )
         data[customer.id] = customer
+        val json: String = jacksonObjectMapper().writeValueAsString(customer)
         return Single.just(customer)
     }
 

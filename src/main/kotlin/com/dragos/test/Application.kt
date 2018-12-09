@@ -15,6 +15,7 @@ import ratpack.error.ServerErrorHandler
 import ratpack.guice.Guice
 import ratpack.rx2.RxRatpack
 import ratpack.server.RatpackServer
+import java.io.File
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
@@ -50,7 +51,7 @@ class MainModule(
     @Provides
     @Singleton
     fun customerRepository(): IPersistableCustomerRepository =
-        PersistableCustomerRepository()
+        PersistableCustomerRepository(file())
 
     @Provides
     @Singleton
@@ -68,6 +69,10 @@ class MainModule(
         else
             Clock.systemUTC()
 
+    // IO
+    @Provides
+    @Singleton
+    fun file(): File = File("database-file.txt") //singleton for file
 
     // Error handlers
 
