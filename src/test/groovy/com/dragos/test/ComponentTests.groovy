@@ -130,10 +130,13 @@ class ComponentTests extends Specification {
     }
 
     def 'persistOne'() {
+        def file = new File('database-file.txt')
+        file.delete()
+
         expect:
         Response r = httpClient.newCall(
                 new Request.Builder()
-                        .url("http://localhost:12345/api/v1/customer/opp/persist")
+                        .url("http://localhost:12345/api/v1/customer/persist")
                         .post(RequestBody.create(
                         applicationJsonMediaType,
                         objectMapper.writeValueAsString([
@@ -160,7 +163,7 @@ class ComponentTests extends Specification {
                 .map {
             httpClient.newCall(
                     new Request.Builder()
-                            .url("http://localhost:12345/api/v1/customer/opp/persist")
+                            .url("http://localhost:12345/api/v1/customer/persist")
                             .post(RequestBody.create(
                             applicationJsonMediaType,
                             objectMapper.writeValueAsString([

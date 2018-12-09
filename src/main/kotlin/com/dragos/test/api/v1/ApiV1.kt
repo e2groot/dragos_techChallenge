@@ -51,7 +51,7 @@ class ApiV1(registry: Registry) : Action<Chain> {
                     .get(::getManyCustomers)
                 }
             }
-            .path("opp/persist") { context -> context
+            .path("persist") { context -> context
                     .byMethod { spec -> spec
                             .post(::persistToDatabase)
                     }
