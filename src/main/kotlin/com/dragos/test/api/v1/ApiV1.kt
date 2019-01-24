@@ -41,7 +41,6 @@ class ApiV1(registry: Registry) : Action<Chain> {
     }
 
     private val customerService = registry[PersistableCustomerService::class.java]
-    private val ctr = AtomicInteger(1)
 
     override fun execute(chain: Chain) {
         chain.prefix("customer") { customerChain -> customerChain
