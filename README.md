@@ -58,9 +58,3 @@ Percivall](jpercivall@dragos.com) as reviewers.
 4. **Bonus: Implement an alternate CustomerRepository that persists
    customers data.**
     * Can be to flat file(s), a database, etc.
-
-### Hints
-
-If you get stuck for a while on a bug fix and need a point in the right
-direction, [Jon Peterson](jpeterson@dragos.com) or [Joe Percivall](
-jpercivall@dragos.com) can provide hints.
