@@ -15,7 +15,7 @@ interface CustomerRepository {
      * @param now    the current time
      * @return the created customer [Single]
      */
-    fun insert(create: CustomerCreate, now: OffsetDateTime): Single<Customer>
+    fun insert(create: CustomerCreate, now: OffsetDateTime): Customer
 
     /**
      * Finds one [Customer] by ID.

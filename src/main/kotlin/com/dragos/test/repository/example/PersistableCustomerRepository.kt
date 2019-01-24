@@ -4,6 +4,7 @@ import com.dragos.test.model.Customer
 import com.dragos.test.model.CustomerCreate
 import com.dragos.test.repository.IPersistableCustomerRepository
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.github.benmanes.caffeine.cache.Caffeine
 import io.reactivex.Single
 import java.io.File
 import java.lang.StringBuilder
@@ -14,11 +15,12 @@ class PersistableCustomerRepository(private val file: File, private val objectMa
     : IPersistableCustomerRepository, InMemoryCustomerRepository() {
 
     private var nextId = AtomicLong(1)
-
+    private var cache = Caffeine.newBuilder().build<String, String>()
     /**
      * This function persists the serialized Customer object into a file
      */
     override fun persistData(model: CustomerCreate, now: OffsetDateTime): Single<Long> {
+
         val strBuilder = StringBuilder()
         val customer = Customer(
                 id = nextId.getAndIncrement(),

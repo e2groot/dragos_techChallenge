@@ -9,6 +9,7 @@ import com.dragos.test.toSingleOrThrow
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
+import io.reactivex.Single.fromCallable
 import java.time.Clock
 import java.time.OffsetDateTime
 
@@ -27,11 +28,11 @@ open class CustomerService(
      */
     fun create(model: CustomerCreate, authToken: AuthToken): Single<Customer> =
             checkPrivilege(authToken, CAN_WRITE_CUSTOMER)
-                    .andThen(
-                            Single.defer {
+                .andThen(
+                            Single.fromCallable {
                                 customerRepository.insert(model, OffsetDateTime.now(clock))
                             }
-                    )
+                )
 
     /**
      * Gets one [Customer] by ID. [AuthToken] must resolve to having [CAN_READ_CUSTOMER] privilege.

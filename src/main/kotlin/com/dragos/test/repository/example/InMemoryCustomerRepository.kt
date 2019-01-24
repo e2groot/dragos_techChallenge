@@ -15,7 +15,7 @@ open class InMemoryCustomerRepository : CustomerRepository {
     /**
      * @see [CustomerRepository.insert]
      */
-    override fun insert(create: CustomerCreate, now: OffsetDateTime): Single<Customer> {
+    override fun insert(create: CustomerCreate, now: OffsetDateTime): Customer {
         val customer = Customer(
             id = nextId.getAndIncrement(),
             name = create.name,
@@ -23,7 +23,7 @@ open class InMemoryCustomerRepository : CustomerRepository {
             lastLoggedInAt = now
         )
         data[customer.id] = customer
-        return Single.just(customer)
+        return customer
     }
 
     /**

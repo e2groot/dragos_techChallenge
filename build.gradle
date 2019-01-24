@@ -54,6 +54,7 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
     compile "me.drmaas:ratpack-rx2:${ratpackRx2Version}"
+    compile 'com.github.ben-manes.caffeine:caffeine:2.6.2'
 
     testCompile "io.ratpack:ratpack-groovy-test:${ratpackVersion}"
     testCompile "com.google.inject:guice:${guiceVersion}"
