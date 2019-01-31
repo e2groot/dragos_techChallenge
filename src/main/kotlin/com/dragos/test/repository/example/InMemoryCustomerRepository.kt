@@ -16,6 +16,7 @@ open class InMemoryCustomerRepository : CustomerRepository {
      * @see [CustomerRepository.insert]
      */
     override fun insert(create: CustomerCreate, now: OffsetDateTime): Customer {
+        //Implement Single.fromCallable here
         val customer = Customer(
             id = nextId.getAndIncrement(),
             name = create.name,

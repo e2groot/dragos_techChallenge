@@ -29,9 +29,9 @@ open class CustomerService(
     fun create(model: CustomerCreate, authToken: AuthToken): Single<Customer> =
             checkPrivilege(authToken, CAN_WRITE_CUSTOMER)
                 .andThen(
-                            Single.fromCallable {
-                                customerRepository.insert(model, OffsetDateTime.now(clock))
-                            }
+                        Single.fromCallable {
+                            customerRepository.insert(model, OffsetDateTime.now(clock))
+                        }
                 )
 
     /**
